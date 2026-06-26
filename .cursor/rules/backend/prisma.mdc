@@ -1,0 +1,53 @@
+---
+description: Prisma and PostgreSQL — type-safe queries, migrations, repository rules
+globs: '{apps/server,packages/database}/**/*'
+alwaysApply: false
+---
+
+# Prisma & PostgreSQL
+
+> Performance rules: see `performance.mdc`.
+> Repository layer rules: see `architecture.mdc`.
+
+## Prisma Client
+
+- Prefer Prisma Client API over `$queryRaw` / `$executeRaw`
+- Use raw SQL only when Prisma Client cannot express the query — document why
+- All queries must be type-safe — no untyped raw results
+
+```ts
+// ✅
+await this.prisma.todo.findMany({ where: { userId } });
+
+// ❌ — unless Prisma Client cannot do it
+await this.prisma.$queryRaw`SELECT * FROM todos`;
+```
+
+## Repository
+
+Repository rules (data access only, no business logic, Prisma isolated) — see `architecture.mdc` — **Repository Rules** and **Layer Responsibilities**.
+
+Use `select` to fetch only required fields instead of loading full records.
+
+## Schema Changes
+
+- All schema changes go through **Prisma Migrate** — never alter the database manually
+- Migration files are committed to `packages/database/prisma/migrations/`
+- Run `yarn db:migrate` in development; migrations run in CI/CD for other environments
+
+## PostgreSQL
+
+- Use pagination for all list endpoints (`skip` / `take` or cursor-based)
+- Do not `SELECT *` equivalent — use Prisma `select` or `include` intentionally
+- Add database indexes for frequently filtered or sorted columns
+- Review query plans when adding indexes or complex queries
+
+```ts
+// ✅ paginated, selected fields
+await this.prisma.todo.findMany({
+  where: { userId },
+  select: { id: true, title: true, completed: true },
+  skip: (page - 1) * pageSize,
+  take: pageSize,
+});
+```

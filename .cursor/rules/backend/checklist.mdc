@@ -1,0 +1,45 @@
+---
+description: Backend pre-completion checklist — architecture, docs, performance
+globs: '{apps/server,packages/database}/**/*'
+alwaysApply: false
+---
+
+# Backend Task Completion Checklist
+
+Before finishing a backend task, verify:
+
+## Architecture
+
+- [ ] Dependency flow is respected: Controller → Use Case → Repository → Prisma
+- [ ] Use Case has no NestJS, Prisma, or HTTP dependencies
+- [ ] Business logic is only in Use Cases
+- [ ] Controller only handles HTTP and calls Use Cases
+- [ ] Repository only handles data access
+- [ ] Imports go through module public API only (see `core.mdc`)
+
+## Code Quality
+
+- [ ] No code duplication — shared logic extracted (DRY)
+- [ ] SOLID and SRP followed (see `core/architecture.mdc`)
+- [ ] No `any`, no plain `Error` throws (see `core/code-style.mdc`, `api.mdc`)
+- [ ] No magic strings or numbers
+
+## API
+
+- [ ] DTOs for all inputs, validated at the boundary
+- [ ] Correct HTTP status codes, `ErrorResponseDto` format, and typed exceptions
+
+## Data
+
+- [ ] Prisma Migrate used for schema changes (no manual DB edits)
+- [ ] Queries are type-safe; no unnecessary `$queryRaw`
+- [ ] List endpoints paginated; no obvious N+1 queries (see `prisma.mdc`, `performance.mdc`)
+
+## Documentation
+
+- [ ] README or architecture docs updated if structure or API contract changed (see `core/workflow.mdc`)
+
+## Performance
+
+- [ ] No unnecessary database queries introduced
+- [ ] No unbounded list responses

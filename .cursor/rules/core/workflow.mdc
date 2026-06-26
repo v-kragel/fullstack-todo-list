@@ -1,0 +1,40 @@
+---
+description: Workflow — analysis, planning, questions, documentation updates
+alwaysApply: true
+---
+
+# Workflow
+
+## Analysis → Plan → Code
+
+1. **Analysis** — understand the task, read relevant code, identify constraints
+2. **Plan** — outline the approach before editing; for non-trivial work, confirm scope
+3. **Code** — implement only what the plan requires
+
+Do not jump straight to code for ambiguous or architectural tasks.
+
+## Ask Questions When Ambiguous
+
+If requirements, scope, or trade-offs are unclear — ask before implementing.
+
+Do not guess on:
+
+- Architectural direction
+- Breaking API or schema changes
+- Dependency additions
+- Scope that affects multiple layers
+
+## Documentation on Architectural Changes
+
+When making **architectural changes**, update the relevant project docs:
+
+- `README.md` — if setup, usage, or project overview is affected
+- Architecture docs — if structure or patterns change
+- `roadmap` — if priorities or milestones shift
+
+This overrides the general "no docs without request" rule for changes you are already making.
+
+## Git Discipline
+
+- Never commit or push unless the user explicitly asks
+- Change only what the task requires — no unrelated refactors or reformatting

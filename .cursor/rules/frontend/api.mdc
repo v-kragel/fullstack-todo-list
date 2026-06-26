@@ -1,0 +1,162 @@
+---
+description: Frontend API rules — React Query, Axios, requests, cache, mutations
+globs: 'apps/client/{app,pages,src}/**/*'
+alwaysApply: false
+---
+
+# Frontend API Rules
+
+> Frontend only. See also: `core.mdc` · `architecture.mdc`
+
+**Stack:** React Query (TanStack Query) + Axios.
+
+## API Paths and Keys
+
+All request paths and query keys live in `src/shared/model/api.ts` as `API_PATHS` and `API_KEYS`. Hardcoding paths or keys elsewhere is forbidden.
+
+```ts
+// src/shared/model/api.ts
+export const API_PATHS = {
+  TODOS: '/todos',
+  TODO_BY_ID: (id: string) => `/todos/${id}`,
+} as const;
+
+export const API_KEYS = {
+  TODOS: ['todos'],
+  TODO: (id: string) => ['todos', id],
+} as const;
+```
+
+## Request Functions
+
+Pure request functions live in `requests.ts` inside the `api` segment of the corresponding slice.
+
+| Layer        | Location                                 |
+| ------------ | ---------------------------------------- |
+| **entities** | `src/entities/[entity]/api/requests.ts`  |
+| **features** | `src/features/[feature]/api/requests.ts` |
+
+Request functions must be pure — no React hooks, no side effects beyond the HTTP call.
+
+## Client Query Hooks
+
+Client-side React Query hooks live in the `api/client/` segment.
+
+**Naming:** `use-[method]-*-query.ts`
+
+```ts
+// src/entities/todo/api/client/use-get-todos-query.ts
+export const useGetTodosQuery = () =>
+  useQuery({
+    queryKey: API_KEYS.TODOS,
+    queryFn: getTodos,
+    ...GET_TODO_LIST_QUERY_OPTIONS,
+  });
+```
+
+## Server Fetch Actions
+
+Server-side fetch requests live in the `api/server/` segment.
+
+**Naming:** `[method]-*-action.ts`
+
+Export server actions through `api/server/index.ts`.
+
+## Mutation Hooks
+
+Mutation hooks live in the `api/client/` segment.
+
+**Naming:** `[method]-[entity-name]-mutation.ts`
+
+## React Query Constants
+
+Shared query parameters (`staleTime`, `gcTime`, `retry`, etc.) live in `api/constants.ts` within the slice. Use the same constants for both client hooks and server actions.
+
+## Cache Invalidation and Updates
+
+Cache utilities live in the **entity** layer at `entities/[entity]/lib/cache.ts`.
+
+| Operation  | Action                                                                       |
+| ---------- | ---------------------------------------------------------------------------- |
+| **Create** | Invalidate the list cache                                                    |
+| **Update** | Invalidate the list cache **and** set the updated entity in the detail cache |
+| **Delete** | Invalidate the list cache and remove the detail cache entry                  |
+
+```ts
+// src/entities/todo/lib/cache.ts
+export const invalidateTodoListCache = () => {
+  queryClient.invalidateQueries({ queryKey: API_KEYS.TODOS });
+};
+
+export const invalidateTodoByIdCache = (todo: Todo) => {
+  queryClient.setQueryData(API_KEYS.TODO(todo.id), todo);
+  queryClient.invalidateQueries({ queryKey: API_KEYS.TODO(todo.id) });
+};
+```
+
+On **update**:
+
+```ts
+// src/features/update-todo/api/client/patch-todo-mutation.ts
+import {
+  invalidateTodoListCache,
+  invalidateTodoByIdCache,
+} from '@/entities/todo';
+
+export const usePatchTodoMutation = () =>
+  useMutation({
+    mutationFn: updateTodo,
+    onSuccess: (updatedTodo) => {
+      invalidateTodoListCache();
+      invalidateTodoByIdCache(updatedTodo);
+    },
+  });
+```
+
+Call cache utilities in mutation `onSuccess` handlers — not in components.
+
+## Page States
+
+Pages that depend on `use*Query` hooks must handle **loading** and **error** states.
+
+```tsx
+if (isLoading && !data) return <Spinner />;
+if (isError) return <Error error={error} />;
+return <TodosList todos={data} />;
+```
+
+## Mutation Error Handling
+
+Async mutation calls must always be wrapped in `try/catch`. Do not use `console.log()` in `catch` blocks.
+
+## File Structure Summary
+
+```
+src/
+├── shared/model/api.ts
+├── entities/todo/
+│   ├── api/
+│   │   ├── index.ts
+│   │   ├── requests.ts
+│   │   ├── constants.ts
+│   │   ├── client/
+│   │   └── server/
+│   └── lib/
+│       ├── index.ts
+│       └── cache.ts
+└── features/create-todo/api/
+    ├── index.ts
+    ├── requests.ts
+    ├── constants.ts
+    └── client/
+```
+
+## Naming Conventions
+
+| Type              | Pattern                         | Example                          |
+| ----------------- | ------------------------------- | -------------------------------- |
+| Server action     | `[method]-*-action.ts`          | `get-todos-action.ts`            |
+| Client query hook | `use-[method]-*-query.ts`       | `use-get-todos-query.ts`         |
+| Mutation hook     | `[method]-[entity]-mutation.ts` | `post-todo-mutation.ts`          |
+| Pure requests     | `requests.ts`                   | `entities/todo/api/requests.ts`  |
+| Query constants   | `constants.ts`                  | `entities/todo/api/constants.ts` |

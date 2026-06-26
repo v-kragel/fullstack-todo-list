@@ -1,0 +1,65 @@
+---
+description: Frontend rules index — core, architecture, and API conventions
+globs: 'apps/client/{app,pages,src}/**/*'
+alwaysApply: false
+---
+
+# Frontend Rules
+
+> Frontend (client) rules. Project-wide rules live in `.cursor/rules/core/`.
+> Server (backend) rules: `.cursor/rules/backend/`.
+
+**Stack:** Next.js (App Router) · FSD · React Query · Axios · next-intl
+
+## Rule Files
+
+When working on frontend code, follow **core** rules plus **all** rules in this folder:
+
+| File               | Scope                                                    |
+| ------------------ | -------------------------------------------------------- |
+| `core.mdc`         | FSD public API, imports, exports, i18n                   |
+| `architecture.mdc` | FSD layers, Next.js integration, server code, navigation |
+| `api.mdc`          | API paths/keys, React Query, cache, mutations            |
+
+## Priority
+
+`api.mdc` > `architecture.mdc` > `core.mdc` > `.cursor/rules/core/*`
+
+## Client Scope (`apps/client`)
+
+```
+apps/client/
+├── app/          # Next.js App Router
+├── pages/        # Pages Router stub
+└── src/          # FSD layers (incl. shared/lib/i18n for translations)
+```
+
+## Checklist
+
+Before finishing a frontend task, verify:
+
+### FSD & structure (`core.mdc`, `architecture.mdc`)
+
+- [ ] Code is in the correct FSD layer and slice
+- [ ] Slice has root `index.ts` public API
+- [ ] Imports follow FSD layer direction and public API rules
+- [ ] Server code in `api/server/` subfolder
+- [ ] Navigation paths use `navigationMap`
+- [ ] Root `app/` page is a thin re-export from `src/pages/`
+- [ ] Root `pages/README.md` stub is present
+
+### Conventions (`core.mdc`)
+
+- [ ] Types in `types.ts`; constants in `model/constants.ts` or `api/constants.ts`
+- [ ] Named exports only (except `page.tsx` / `layout.tsx`)
+- [ ] Checked `shared/` before creating new utilities or UI
+- [ ] No hardcoded user-facing text (see `architecture.mdc`)
+
+### API & data (`api.mdc`)
+
+- [ ] Paths and keys in `shared/model/api.ts` (`API_PATHS`, `API_KEYS`)
+- [ ] Pure request functions in `api/requests.ts`
+- [ ] Client hooks in `api/client/`, server actions in `api/server/`
+- [ ] Cache utilities in entity `lib/cache.ts`
+- [ ] Pages handle loading and error states for `use*Query`
+- [ ] Async mutations wrapped in `try/catch`

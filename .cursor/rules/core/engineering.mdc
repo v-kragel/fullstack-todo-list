@@ -1,0 +1,35 @@
+---
+description: Engineering — dependencies, secrets, env, validation, performance
+alwaysApply: true
+---
+
+# Engineering
+
+## Dependencies
+
+Do not add packages unless there is a clear need. Prefer built-in APIs or existing project utilities.
+
+Never add a dependency without the user's request unless the task explicitly requires it.
+
+## Secrets and Configuration
+
+- Never hardcode secrets, tokens, or credentials in source code
+- Use environment variables via `.env` (and `.env.example` for documentation)
+- Do not commit `.env` files with real values
+
+## Input Validation
+
+Validate all external input at system boundaries:
+
+- API request bodies and query params
+- Form submissions
+- Environment variables required at startup
+- Webhook and third-party payloads
+
+Fail fast with clear errors; do not trust unvalidated input deeper in the stack.
+
+## Performance
+
+- Do not optimize prematurely — measure or identify a real bottleneck first
+- Avoid obviously inefficient patterns: N+1 queries, unbounded loops over large datasets, synchronous blocking on hot paths, loading entire collections when pagination exists
+- Prefer readable code; optimize only when there is evidence it matters

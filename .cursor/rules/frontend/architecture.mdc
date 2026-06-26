@@ -1,0 +1,145 @@
+---
+description: Frontend architecture — FSD layers, Next.js integration, navigation, i18n
+globs: 'apps/client/{app,pages,src}/**/*'
+alwaysApply: false
+---
+
+# Frontend Architecture
+
+> Frontend only. See also: `core.mdc` · `api.mdc`
+
+**Stack:** Next.js (App Router) + [Feature-Sliced Design (FSD)](https://fsd.how/).
+
+## Next.js and FSD Integration
+
+Next.js and FSD conflict over the `app` and `pages` folders. The fix follows the [official FSD guide for Next.js](https://fsd.how/docs/guides/tech/with-nextjs/#app-router).
+
+### Project Structure
+
+```
+app/                        # Next.js App Router — thin routing layer
+├── layout.tsx              # Page Layout
+└── [route]/page.tsx        # re-export pages from the FSD pages layer
+
+pages/
+└── README.md               # stub to avoid Next.js Pages Router conflict
+
+src/                        # all FSD layers
+├── app/                    # FSD App layer (providers, api, styles)
+├── pages/                  # FSD Pages layer
+│   └── [page-name]/
+├── widgets/
+├── features/
+├── entities/
+└── shared/
+```
+
+### Integration Rules
+
+1. **Next.js `app`** (root `app/`) — routing only. Re-exports pages from the FSD `src/pages/` layer.
+2. **Root `pages/`** — contains only `README.md` as a stub. Prevents Next.js from treating `src/pages/` as the Pages Router. Required even when empty.
+3. **FSD layers** (all under `src/`) — business logic and UI. The FSD `app` layer (`src/app/`) is separate from the Next.js `app/` folder.
+
+### Page Re-export Example
+
+```tsx
+// app/example/page.tsx
+export { ExamplePage } from '@/pages/example';
+```
+
+## FSD Layers
+
+Layers are ordered top to bottom by decreasing responsibility. Each layer contains **slices** (by business domain); each slice contains **segments** (`ui`, `api`, `model`, `lib`, `config`).
+
+| Layer        | Purpose                                          | Examples                              |
+| ------------ | ------------------------------------------------ | ------------------------------------- |
+| **app**      | App initialization, providers, global styles     | `providers`, `styles`                 |
+| **pages**    | Full pages — composition of widgets and features | `home`, `todo-list`                   |
+| **widgets**  | Large self-contained UI blocks                   | `header`, `todo-list-panel`           |
+| **features** | User scenarios and actions                       | `create-todo`, `toggle-todo`          |
+| **entities** | Business entities                                | `todo`, `user`                        |
+| **shared**   | Reusable code with no domain coupling            | `ui`, `lib`, `api`, `config`, `model` |
+
+### Segments Within a Slice
+
+| Segment  | Purpose                             |
+| -------- | ----------------------------------- |
+| `ui`     | React components                    |
+| `api`    | Requests, data/query hooks, actions |
+| `model`  | Types, stores, business logic       |
+| `lib`    | Slice-specific helper functions     |
+| `config` | Slice configuration                 |
+
+Server code is not a standalone segment — it lives inside the relevant segment under a `server/` subfolder (see "Server Code" below).
+
+## Import Direction
+
+Imports are allowed **top-down only** — from upper layers into lower layers.
+
+```
+app → pages → widgets → features → entities → shared
+```
+
+### Allowed
+
+- `features/create-todo` imports from `entities/todo`, `shared/ui`
+- `pages/home` imports from `widgets/header`, `features/create-todo`
+
+### Forbidden
+
+- Importing from an upper layer into a lower one (`shared` → `features`)
+- Cross-imports between slices on the same layer (`features/create-todo` → `features/delete-todo`)
+
+For public API and import rules, see `core.mdc` — **Import Through Slice Public API Only**.
+
+## Server Code
+
+Server components, functions, and variables live inside a `server/` subfolder **within the corresponding segment** — not at the slice root. Each `server/` folder exports through its own `index.ts`.
+
+Importing from `api/server/` is an exception to the slice public API rule — see `core.mdc` — **Deep Imports — Exceptions Only**. For naming and usage, see `api.mdc`.
+
+```ts
+// ✅ Server import through segment server public API
+import { createTodoAction } from '@/features/create-todo/api/server';
+import { queryClient } from '@/shared/api/server';
+
+// ❌ Server code through the client API
+import { createTodoAction } from '@/features/create-todo';
+```
+
+## Navigation
+
+All navigation paths live in `src/shared/model/navigation` as the `navigationMap` constant.
+
+```ts
+// src/shared/model/navigation.ts
+export const navigationMap = {
+  home: '/',
+  todos: '/todos',
+  todoDetail: (id: string) => `/todos/${id}`,
+} as const;
+```
+
+```tsx
+import { navigationMap } from '@/shared/model';
+import Link from 'next/link';
+
+<Link href={navigationMap.todos}>Todos</Link>;
+```
+
+Hardcoded paths (`'/todos'`) in components are forbidden.
+
+## Import Aliases
+
+Always use aliases instead of relative paths between layers. See `core/code-style.mdc`. Base alias: `@/` → `src/`.
+
+## Internationalization
+
+All user-facing text goes through [next-intl](https://next-intl.dev/). Hardcoded strings in components are forbidden.
+
+```tsx
+const t = useTranslations('CreateTodo');
+return <button>{t('submit')}</button>;
+```
+
+Translations live in `src/shared/lib/i18n/`.

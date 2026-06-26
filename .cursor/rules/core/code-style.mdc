@@ -1,0 +1,76 @@
+---
+description: Code style — TypeScript strict, naming, import aliases
+alwaysApply: true
+---
+
+# Code Style
+
+## TypeScript
+
+- Use **strict** mode; do not disable strict checks to bypass errors
+- Do not use `any`
+- Avoid `as` type assertions — prefer proper typing, generics, or type guards
+- Do not use `enum` — use `as const` objects and derived union types
+- Add explicit types where they improve readability (public APIs, non-obvious return values, complex parameters)
+
+```ts
+// ✅
+export const STATUS = { active: 'active', done: 'done' } as const;
+export type Status = (typeof STATUS)[keyof typeof STATUS];
+
+// ❌
+enum Status {
+  Active = 'active',
+  Done = 'done',
+}
+const value = data as SomeType;
+```
+
+## Naming
+
+Use **kebab-case** for all files and folders.
+
+```
+✅ create-todo-form.tsx
+✅ todo-list-panel/
+
+❌ CreateTodoForm.tsx
+❌ todoListPanel/
+```
+
+Exception: `index.ts` / `index.tsx`.
+
+## Import Aliases
+
+Use path aliases instead of deep relative imports between modules.
+
+### Client (`apps/client`)
+
+`@/` → `apps/client/src/`
+
+```ts
+import { TodoCard } from '@/entities/todo';
+import { Button } from '@/shared/ui';
+```
+
+### Server (`apps/server`)
+
+`@/` → `apps/server/src/`
+
+```ts
+import { CreateTodoUseCase } from '@/application/create-todo';
+import { TodoRepository } from '@/domain/todo';
+import { TodoController } from '@/presentation/todo';
+```
+
+### Shared packages
+
+`@repo/database` → `packages/database`  
+`@repo/shared` → `packages/shared`
+
+Configure paths in each app's `tsconfig.json`. Do not use deep relative imports across layers.
+
+```ts
+// ❌
+import { CreateTodoUseCase } from '@/application/create-todo';
+```

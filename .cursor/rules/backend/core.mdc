@@ -1,0 +1,70 @@
+---
+description: Backend conventions — public API, imports, exports
+globs: '{apps/server,packages/database}/**/*'
+alwaysApply: false
+---
+
+# Backend Conventions
+
+> Backend only. Project-wide rules: `.cursor/rules/core/`.
+> See also: `architecture.mdc` · `api.mdc`
+
+## Barrel `index.ts` in Every Module
+
+Each module (slice) within a layer must have a root `index.ts` that serves as its public API.
+
+```
+application/create-todo/
+├── create-todo.use-case.ts
+└── index.ts              # required — module public API
+
+domain/todo/
+├── todo.entity.ts
+├── todo.repository.ts
+└── index.ts
+```
+
+## Import Through Module Public API Only
+
+Import from the module's public `index.ts` (`@/layer/module`). Never import internal files directly.
+
+| Layer            | Public API path             | Example                     |
+| ---------------- | --------------------------- | --------------------------- |
+| `domain`         | `@/domain/[module]`         | `@/domain/todo`             |
+| `application`    | `@/application/[module]`    | `@/application/create-todo` |
+| `infrastructure` | `@/infrastructure/[module]` | `@/infrastructure/todo`     |
+| `presentation`   | `@/presentation/[module]`   | `@/presentation/todo`       |
+
+```ts
+// ✅
+import { CreateTodoUseCase } from '@/application/create-todo';
+import { TodoRepository, Todo } from '@/domain/todo';
+import { TodoController } from '@/presentation/todo';
+
+// ❌ — deep file import
+import { CreateTodoUseCase } from '@/application/create-todo/create-todo.use-case';
+import { Todo } from '@/domain/todo/todo.entity';
+```
+
+If something is missing from the public API — add it to the module `index.ts`, do not import around it.
+
+## Internal Barrels — Wiring Only
+
+Use relative imports **only inside a module** when building its `index.ts`. External code must never import from internal files.
+
+## Deep Imports — Exceptions Only
+
+Reaching into module internals from outside is allowed only in:
+
+- `main.ts`, `app.module.ts` (NestJS bootstrap and root module wiring)
+- `tsconfig.json`, `nest-cli.json`
+
+## Exports
+
+Avoid `export default`. Use named exports and re-export via `index.ts`.
+
+## Types and Constants
+
+- Types and interfaces — `types.ts` within the module
+- Domain constants — `constants.ts` in `domain/` modules
+- API/presentation constants — `constants.ts` in `presentation/` modules

@@ -1,0 +1,101 @@
+---
+description: Backend Clean Architecture — Controller, Use Case, Repository, Prisma
+globs: '{apps/server,packages/database}/**/*'
+alwaysApply: false
+---
+
+# Backend Architecture
+
+> See also: `core.mdc` · `api.mdc` · `prisma.mdc` · `core/architecture.mdc` (SOLID, SRP, KISS, DRY)
+
+## Dependency Flow
+
+Strict top-down dependencies only:
+
+```
+Controller → Use Case → Repository → Prisma
+```
+
+### Allowed
+
+- Controller imports and calls Use Case (via `@/application/[module]`)
+- Use Case imports Repository interface (via `@/domain/[module]`)
+- Repository implementation imports Prisma Client
+
+### Forbidden
+
+- Use Case importing NestJS decorators, HTTP types, or Prisma
+- Repository containing business logic
+- Controller accessing Prisma or Repository directly
+- Skipping layers (Controller → Repository)
+- Deep file imports (see `core.mdc`)
+
+## Layer Responsibilities
+
+| Layer          | Responsibility                               | Must NOT                          |
+| -------------- | -------------------------------------------- | --------------------------------- |
+| **Controller** | HTTP handling, DTO mapping, calling Use Case | Business logic, database access   |
+| **Use Case**   | Business rules and orchestration             | Depend on NestJS, Prisma, or HTTP |
+| **Repository** | Data access and persistence mapping          | Business logic, HTTP concerns     |
+| **Prisma**     | Database queries (via Repository only)       | Business decisions                |
+
+## Use Case Rules
+
+- All business logic lives **only** in Use Cases
+- Use Cases are plain TypeScript classes — no NestJS imports, decorators, or Prisma inside the class
+- Accept input as plain types or domain objects — not NestJS DTOs
+- Return domain results or throw domain exceptions
+
+The Use Case **class** stays framework-agnostic. NestJS wires it via `providers` in a module — that registration lives in `presentation/` or `infrastructure/`, not inside the Use Case file.
+
+```ts
+// ✅ Use Case — plain TypeScript, repository interface only
+export class CreateTodoUseCase {
+  constructor(private readonly todoRepository: TodoRepository) {}
+
+  async execute(input: CreateTodoInput): Promise<Todo> {
+    // business logic here
+  }
+}
+
+// ❌ — Prisma or NestJS inside the Use Case class
+export class CreateTodoUseCase {
+  constructor(private readonly prisma: PrismaService) {}
+}
+```
+
+## Repository Rules
+
+- One repository per aggregate or entity group
+- Expose an interface (port) in `domain/`; implement in `infrastructure/`
+- Map Prisma models to domain entities inside the repository
+
+## Folder Structure
+
+```
+apps/server/src/
+├── domain/
+│   └── todo/
+│       ├── todo.entity.ts
+│       ├── todo.repository.ts
+│       └── index.ts
+├── application/
+│   └── create-todo/
+│       ├── create-todo.use-case.ts
+│       └── index.ts
+├── infrastructure/
+│   └── todo/
+│       ├── prisma-todo.repository.ts
+│       └── index.ts
+└── presentation/
+    └── todo/
+        ├── todo.controller.ts
+        ├── dto/
+        └── index.ts
+```
+
+## Code Organization
+
+- Prefer small functions with a single responsibility (see `core/architecture.mdc` SRP)
+- No magic strings or numbers — use `constants.ts` (see `core/code-style.mdc`)
+- Do not duplicate logic — extract shared code into domain or application helpers (DRY)

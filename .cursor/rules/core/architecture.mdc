@@ -1,0 +1,37 @@
+---
+description: Architecture principles — SOLID, SRP, KISS, DRY, no unnecessary changes
+alwaysApply: true
+---
+
+# Architecture Principles
+
+## Do Not Change Architecture Without Reason
+
+Do not refactor folder structure, patterns, or abstractions unless the task requires it or there is a clear, stated benefit.
+
+Prefer the smallest change that solves the problem within the existing architecture.
+
+## SOLID and Single Responsibility
+
+- Each module, class, or function should have **one reason to change**
+- Keep business logic, UI, data access, and infrastructure separated
+- Favor composition over inheritance
+- Depend on abstractions, not concrete implementations, when the boundary is stable
+
+## Separation of Concerns
+
+- UI should not contain data-fetching logic beyond what the view needs
+- Validation belongs at system boundaries (API input, forms, env config)
+- Configuration and secrets stay outside application logic
+
+## KISS
+
+- Choose the simplest solution that meets the requirement
+- Do not add layers, patterns, or indirection "for the future"
+- Three similar lines are better than a premature abstraction
+
+## DRY
+
+- Extract duplication only when the logic is truly the same and likely to change together
+- Do not DRY at the cost of clarity or coupling unrelated concepts
+- Point to canonical implementations instead of copying code into rules or docs

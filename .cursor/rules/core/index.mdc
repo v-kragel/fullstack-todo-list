@@ -1,0 +1,24 @@
+---
+description: Project-wide core rules — architecture, workflow, code style, engineering
+alwaysApply: true
+---
+
+# Core Rules
+
+> Apply to the **entire project** (frontend and backend).
+> Stack-specific rules live in `.cursor/rules/frontend/` and `.cursor/rules/backend/`.
+
+## Rule Files
+
+| File | Scope |
+|------|-------|
+| `architecture.mdc` | Architecture principles — SOLID, SRP, KISS, DRY |
+| `workflow.mdc` | How to approach tasks — analysis, planning, communication |
+| `code-style.mdc` | TypeScript, naming, imports |
+| `engineering.mdc` | Dependencies, security, validation, performance |
+
+## Priority
+
+Stack-specific rules override core when they are more specific:
+
+`frontend/*` or `backend/*` > `core/*`

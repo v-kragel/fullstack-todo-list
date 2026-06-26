@@ -1,0 +1,46 @@
+---
+description: Backend rules index — Clean Architecture, NestJS, Prisma
+globs: '{apps/server,packages/database}/**/*'
+alwaysApply: false
+---
+
+# Backend Rules
+
+> Backend-specific rules. Project-wide rules live in `.cursor/rules/core/`.
+> Client (frontend) rules: `.cursor/rules/frontend/`.
+
+**Stack:** NestJS · Prisma · PostgreSQL · OpenTelemetry
+
+## Rule Files
+
+When working on backend code, follow **core** rules plus **all** rules in this folder:
+
+| File               | Scope                                                       |
+| ------------------ | ----------------------------------------------------------- |
+| `core.mdc`         | Public API, imports, exports, types, constants              |
+| `architecture.mdc` | Clean Architecture, dependency flow, layer responsibilities |
+| `api.mdc`          | DTOs, HTTP status codes, errors, error format               |
+| `prisma.mdc`       | Prisma Client, migrations, repository data access           |
+| `performance.mdc`  | Query efficiency, N+1                                       |
+| `checklist.mdc`    | Pre-completion verification                                 |
+
+## Priority
+
+`checklist.mdc` applies on task completion. Among domain rules:
+
+`api.mdc` > `architecture.mdc` > `core.mdc` > `.cursor/rules/core/*`
+
+## Backend Scope
+
+```
+apps/server/           # NestJS application
+packages/database/     # Prisma schema, client, migrations
+```
+
+## Checklist
+
+Before finishing a backend task, see `checklist.mdc`. Key conventions (`core.mdc`):
+
+- [ ] Module has root `index.ts` public API
+- [ ] Imports go through module public API only (`@/layer/module`)
+- [ ] Named exports only

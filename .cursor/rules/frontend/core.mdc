@@ -1,0 +1,92 @@
+---
+description: Frontend conventions — FSD public API, imports, exports, i18n
+globs: 'apps/client/{app,pages,src}/**/*'
+alwaysApply: false
+---
+
+# Frontend Conventions
+
+> Frontend only. Project-wide rules: `.cursor/rules/core/`.
+> See also: `architecture.mdc` · `api.mdc`
+
+## Barrel `index.ts` in Every Slice
+
+Every slice must have a root `index.ts` that serves as its public API.
+
+```
+features/create-todo/
+├── api/
+├── ui/
+└── index.ts        # required — slice public API
+```
+
+## Import Through Slice Public API Only
+
+Import from the public API of a slice or shared segment. Never reach into internal files.
+
+| Layer                                      | Public API path    | Example                       |
+| ------------------------------------------ | ------------------ | ----------------------------- |
+| `features`, `entities`, `widgets`, `pages` | `@/layer/slice`    | `@/entities/todo`             |
+| `shared`                                   | `@/shared/segment` | `@/shared/ui`, `@/shared/lib` |
+
+The `shared` layer has no domain slices — its segments (`ui`, `lib`, `api`, `model`) are the public API entry points.
+
+```ts
+// ✅
+import { CreateTodoForm, getTodos } from '@/features/create-todo';
+import { TodoCard, useGetTodosQuery } from '@/entities/todo';
+import { Button } from '@/shared/ui';
+
+// ❌ — segment import (non-shared layers)
+import { getTodos } from '@/entities/todo/api';
+
+// ❌ — deep file import
+import { CreateTodoForm } from '@/features/create-todo/ui/create-todo-form';
+```
+
+If something is missing from the public API — add it to the slice `index.ts`, do not import around it.
+
+## Types in `types.ts`
+
+Types and interfaces live in `types.ts` within the relevant segment or slice.
+
+## Constants in `constants.ts`
+
+`constants.ts` can live in both `model/` and `api/` segments. Do not mix domain and API constants.
+
+| Segment      | Purpose                                               |
+| ------------ | ----------------------------------------------------- |
+| **`model/`** | Domain constants — statuses, limits, validation rules |
+| **`api/`**   | API constants — React Query options, retry config     |
+
+See `api.mdc` for API-specific usage.
+
+## Segment Barrels — Internal Use Only
+
+Use segment `index.ts` barrels **only inside the slice** when wiring the root `index.ts`. External code must never import from them.
+
+## Deep Imports — Exceptions Only
+
+Reaching into a slice from outside is allowed only in:
+
+- `next.config.ts` / `tsconfig.json`
+- Server fetch actions from `api/server/` (see `api.mdc` and `architecture.mdc`)
+
+## Exports
+
+Avoid `export default`. Use named exports and re-export via `index.ts`.
+
+Exception: `export default` is allowed **only** in `page.tsx` and `layout.tsx` (Next.js requirement).
+
+```tsx
+// app/todos/page.tsx — allowed
+export { TodosPage as default } from '@/pages/todos';
+```
+
+## Reuse Before Create
+
+Before adding a utility or UI component, check `shared/ui`, `shared/lib`, and `shared/utils`. Do not duplicate existing helpers.
+
+## Internationalization
+
+All user-facing strings go through i18n (next-intl). See `architecture.mdc` for examples.

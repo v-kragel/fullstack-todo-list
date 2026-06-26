@@ -1,0 +1,104 @@
+---
+description: Backend API — DTOs, HTTP status, errors, unified error format
+globs: '{apps/server,packages/database}/**/*'
+alwaysApply: false
+---
+
+# Backend API
+
+> Layer responsibilities: see `architecture.mdc`.
+> Public API imports: see `core.mdc`.
+> Input validation at boundaries: see `core/engineering.mdc`.
+> TypeScript rules: see `core/code-style.mdc`.
+
+## DTOs
+
+- Use a DTO class for **every** input: body, query, and params
+- Validate with `class-validator` decorators or Zod pipe — never trust raw input
+- Never accept `any` as a parameter or return type
+- Keep DTOs in the presentation layer; map to Use Case input inside the controller
+
+```ts
+// ✅
+@Post()
+create(@Body() dto: CreateTodoDto) {
+  return this.createTodoUseCase.execute(dto);
+}
+
+// ❌
+@Post()
+create(@Body() body: any) { ... }
+```
+
+## HTTP Status Codes
+
+Return semantically correct status codes:
+
+| Code  | When                                                |
+| ----- | --------------------------------------------------- |
+| `200` | Successful GET, PATCH, PUT                          |
+| `201` | Resource created                                    |
+| `204` | Successful DELETE with no body                      |
+| `400` | Validation error                                    |
+| `401` | Unauthenticated                                     |
+| `403` | Forbidden                                           |
+| `404` | Resource not found                                  |
+| `409` | Conflict (duplicate, state conflict)                |
+| `500` | Unexpected server error (never for business errors) |
+
+## Unified Error Format
+
+All API errors return `ErrorResponseDto` via a global exception filter — controllers must not format errors manually.
+
+```ts
+class ErrorResponseDto {
+  statusCode: number;
+  message: string | string[];
+  error: string;
+  timestamp: string;
+  path: string;
+}
+```
+
+- `message` — human-readable text; use `string[]` for validation errors (one message per field)
+- `error` — short error name (e.g. `Bad Request`, `Not Found`)
+- `timestamp` — ISO 8601 string
+- `path` — request URL path
+
+## Errors
+
+### Never Throw Plain `Error`
+
+Do not throw `new Error('...')` in application or domain code.
+
+| Layer             | Exception type                                                   |
+| ----------------- | ---------------------------------------------------------------- |
+| Domain / Use Case | Domain exceptions (`TodoNotFoundError`, `InvalidTodoTitleError`) |
+| Presentation      | NestJS HTTP exceptions mapped by a global filter                 |
+
+```ts
+// ✅ domain
+throw new TodoNotFoundError(todoId);
+
+// ✅ presentation filter maps to HTTP
+throw new NotFoundException('Todo not found');
+
+// ❌
+throw new Error('Todo not found');
+```
+
+### Domain Exceptions
+
+- Live in the `domain/` layer
+- Carry enough context for client messages
+- Are mapped to HTTP status in the presentation layer — not inside Use Cases
+
+### HTTP Exceptions
+
+- Use NestJS `HttpException` subclasses in controllers/filters when mapping domain errors
+- Business rule violations → `400` or `409`, not `500`
+- Unexpected infrastructure failures → `500`
+
+## Controllers
+
+Controller rules (HTTP only, call Use Cases, map DTOs) — see `architecture.mdc` — **Layer Responsibilities** and **Dependency Flow**.

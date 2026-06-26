@@ -1,0 +1,36 @@
+---
+description: Backend performance — query efficiency, N+1
+globs: '{apps/server,packages/database}/**/*'
+alwaysApply: false
+---
+
+# Backend Performance
+
+> General performance principles: see `core/engineering.mdc`.
+> Pagination, indexes, `select`: see `prisma.mdc`.
+
+## Database Queries
+
+- Avoid unnecessary round-trips — do not query the same entity twice in one request
+- Prefer one well-structured query over multiple simple ones when it reduces latency
+- Watch for **N+1 queries** — use Prisma `include` / `select` with relations, or batch with `findMany` + `in`
+
+```ts
+// ❌ N+1 — query per todo
+for (const todo of todos) {
+  await this.prisma.comment.findMany({ where: { todoId: todo.id } });
+}
+
+// ✅ single query
+await this.prisma.todo.findMany({
+  include: { comments: true },
+});
+```
+
+## When to Optimize
+
+Do not optimize without evidence. But always avoid patterns that are **obviously** inefficient:
+
+- Loading full tables into memory
+- Queries inside loops
+- Unbounded list responses (see `prisma.mdc` for pagination)
