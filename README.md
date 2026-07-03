@@ -209,6 +209,26 @@ Commands are run from the monorepo root via Turborepo and Yarn workspaces.
 | `yarn format`       | Format with Prettier                           |
 | `yarn format:check` | Check formatting                               |
 
+### Git hooks (Husky)
+
+After `yarn install`, Husky runs automatically via the `prepare` script.
+
+| Hook         | Checks                                              |
+| ------------ | --------------------------------------------------- |
+| `pre-commit` | lint-staged (prettier + eslint fix on staged files) |
+| `pre-push`   | TypeScript check across workspaces                  |
+| `commit-msg` | Conventional commit message format                  |
+
+Commit messages must follow `type: description`, for example:
+
+```
+feat: add todo list filter
+fix: handle empty title on create
+chore: update dependencies
+```
+
+Allowed types: `build`, `chore`, `ci`, `docs`, `feat`, `fix`, `perf`, `refactor`, `revert`, `style`, `test`.
+
 Run a single package:
 
 ```bash
