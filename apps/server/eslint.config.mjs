@@ -1,0 +1,7 @@
+import { createNodeConfig } from "@repo/eslint-config/node";
+
+export default createNodeConfig({
+  tsconfigRootDir: import.meta.dirname,
+  ignores: ["eslint.config.mjs", "dist/**"],
+  includeJestGlobals: true,
+});

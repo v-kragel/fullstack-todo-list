@@ -1,0 +1,32 @@
+{
+  "$schema": "https://turbo.build/schema.json",
+  "tasks": {
+    "dev": {
+      "cache": false,
+      "persistent": true
+    },
+    "lint": {
+      "inputs": [
+        "$TURBO_DEFAULT$",
+        "eslint.config.mjs",
+        "../../packages/eslint-config/**"
+      ]
+    },
+    "lint:fix": {
+      "cache": false,
+      "inputs": [
+        "$TURBO_DEFAULT$",
+        "eslint.config.mjs",
+        "../../packages/eslint-config/**"
+      ]
+    },
+    "typecheck": {
+      "inputs": [
+        "$TURBO_DEFAULT$",
+        "tsconfig.json",
+        "tsconfig.*.json",
+        "../../packages/typescript-config/**"
+      ]
+    }
+  }
+}

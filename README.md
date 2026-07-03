@@ -199,17 +199,35 @@ yarn dev
 
 Commands are run from the monorepo root via Turborepo and Yarn workspaces.
 
-| Command            | Description                                    |
-| ------------------ | ---------------------------------------------- |
-| `yarn dev`         | Start frontend and backend in development mode |
-| `yarn build`       | Build all applications                         |
-| `yarn lint`        | Lint                                           |
-| `yarn test`        | Unit / integration tests (Jest)                |
-| `yarn test:e2e`    | E2E tests (Playwright)                         |
-| `yarn db:migrate`  | Apply Prisma migrations                        |
-| `yarn db:studio`   | Open Prisma Studio                             |
-| `yarn docker:up`   | Start Docker Compose                           |
-| `yarn docker:down` | Stop containers                                |
+| Command             | Description                                    |
+| ------------------- | ---------------------------------------------- |
+| `yarn dev`          | Start frontend and backend in development mode |
+| `yarn build`        | Build all applications                         |
+| `yarn lint`         | Lint all workspaces                            |
+| `yarn lint:fix`     | Lint with auto-fix                             |
+| `yarn typecheck`    | TypeScript check across workspaces             |
+| `yarn format`       | Format with Prettier                           |
+| `yarn format:check` | Check formatting                               |
+
+### Git hooks (Husky)
+
+After `yarn install`, Husky runs automatically via the `prepare` script.
+
+| Hook         | Checks                                              |
+| ------------ | --------------------------------------------------- |
+| `pre-commit` | lint-staged (prettier + eslint fix on staged files) |
+| `pre-push`   | TypeScript check across workspaces                  |
+| `commit-msg` | Conventional commit message format                  |
+
+Commit messages must follow `type: description`, for example:
+
+```
+feat: add todo list filter
+fix: handle empty title on create
+chore: update dependencies
+```
+
+Allowed types: `build`, `chore`, `ci`, `docs`, `feat`, `fix`, `perf`, `refactor`, `revert`, `style`, `test`.
 
 Run a single package:
 
@@ -217,6 +235,8 @@ Run a single package:
 yarn workspace client dev
 yarn workspace server dev
 ```
+
+> Linting and TypeScript setup: [ADR-0001](docs/adr/0001-eslint-monorepo.md), [ADR-0002](docs/adr/0002-shared-typescript-config.md).
 
 ---
 
@@ -243,9 +263,11 @@ fullstack-todo-list/
 │           └── presentation/     # Controllers, modules
 │
 ├── packages/
-│   ├── database/                 # Prisma schema, client, migrations
-│   ├── shared/                   # Shared types and utilities
-│   └── config/                   # ESLint, TypeScript, Tailwind configs
+│   ├── eslint-config/            # Shared ESLint config (@repo/eslint-config)
+│   └── typescript-config/        # Shared tsconfig presets (@repo/typescript-config)
+│
+├── docs/
+│   └── adr/                      # Architecture Decision Records
 │
 ├── docker/
 │   ├── docker-compose.yml
@@ -255,7 +277,7 @@ fullstack-todo-list/
 │   └── workflows/                # GitHub Actions
 │
 ├── turbo.json
-├── package.json                  # Workspaces configuration
+├── package.json                  # Yarn workspaces + root scripts
 └── README.md
 ```
 
