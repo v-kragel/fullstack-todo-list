@@ -1,6 +1,8 @@
 {
   "editor.formatOnSave": true,
   "editor.defaultFormatter": "esbenp.prettier-vscode",
+  "files.insertFinalNewline": false,
+  "files.trimFinalNewlines": true,
   "prettier.requireConfig": true,
   "prettier.configPath": "./prettier.config.mjs",
   "prettier.prettierPath": "./node_modules/prettier",
