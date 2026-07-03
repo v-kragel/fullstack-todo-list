@@ -21,7 +21,12 @@
       ]
     },
     "typecheck": {
-      "inputs": ["$TURBO_DEFAULT$", "tsconfig.json", "tsconfig.*.json"]
+      "inputs": [
+        "$TURBO_DEFAULT$",
+        "tsconfig.json",
+        "tsconfig.*.json",
+        "../../packages/typescript-config/**"
+      ]
     }
   }
 }

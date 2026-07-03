@@ -216,7 +216,7 @@ yarn workspace client dev
 yarn workspace server dev
 ```
 
-> Linting and TypeScript setup: see [ADR-0001](docs/adr/0001-eslint-typescript-monorepo.md).
+> Linting and TypeScript setup: [ADR-0001](docs/adr/0001-eslint-monorepo.md), [ADR-0002](docs/adr/0002-shared-typescript-config.md).
 
 ---
 
@@ -243,7 +243,8 @@ fullstack-todo-list/
 │           └── presentation/     # Controllers, modules
 │
 ├── packages/
-│   └── eslint-config/            # Shared ESLint config (@repo/eslint-config)
+│   ├── eslint-config/            # Shared ESLint config (@repo/eslint-config)
+│   └── typescript-config/        # Shared tsconfig presets (@repo/typescript-config)
 │
 ├── docs/
 │   └── adr/                      # Architecture Decision Records
@@ -257,7 +258,6 @@ fullstack-todo-list/
 │
 ├── turbo.json
 ├── package.json                  # Yarn workspaces + root scripts
-├── tsconfig.base.json            # Shared TypeScript compiler defaults
 └── README.md
 ```
 
