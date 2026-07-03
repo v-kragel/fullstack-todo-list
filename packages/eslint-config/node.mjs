@@ -2,6 +2,7 @@ import globals from "globals";
 import { defineConfig } from "eslint/config";
 
 import { createBaseConfig } from "./base.mjs";
+import { serverAppBoundaryRules } from "./boundaries.mjs";
 
 /**
  * @param {{
@@ -29,6 +30,7 @@ export function createNodeConfig(options) {
       tsconfigRootDir,
       ignores,
       globals: customGlobals ?? defaultGlobals,
-    })
+    }),
+    { rules: serverAppBoundaryRules }
   );
 }

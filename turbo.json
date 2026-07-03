@@ -27,6 +27,11 @@
         "tsconfig.*.json",
         "../../packages/typescript-config/**"
       ]
+    },
+    "build": {
+      "dependsOn": ["^build"],
+      "inputs": ["$TURBO_DEFAULT$"],
+      "outputs": ["dist/**", ".next/**", "!.next/cache/**"]
     }
   }
 }

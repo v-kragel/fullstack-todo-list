@@ -26,7 +26,7 @@ function workspaceEslintFix(workspaceDir) {
       .map((file) => JSON.stringify(file))
       .join(" ");
 
-    return `yarn --cwd ${workspaceDir} eslint --fix --max-warnings 0 ${fileArgs}`;
+    return `yarn --cwd ${workspaceDir} eslint --fix --max-warnings 0 --no-warn-ignored ${fileArgs}`;
   };
 }
 
