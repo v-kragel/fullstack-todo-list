@@ -204,6 +204,8 @@ Commands are run from the monorepo root via Turborepo and Yarn workspaces.
 | `yarn dev`         | Start frontend and backend in development mode |
 | `yarn build`       | Build all applications                         |
 | `yarn lint`        | Lint                                           |
+| `yarn lint:fix`    | Lint with auto-fix                             |
+| `yarn typecheck`   | TypeScript check across packages               |
 | `yarn test`        | Unit / integration tests (Jest)                |
 | `yarn test:e2e`    | E2E tests (Playwright)                         |
 | `yarn db:migrate`  | Apply Prisma migrations                        |
@@ -217,6 +219,8 @@ Run a single package:
 yarn workspace client dev
 yarn workspace server dev
 ```
+
+> Linting and TypeScript setup: see [ADR-0001](docs/adr/0001-eslint-typescript-monorepo.md).
 
 ---
 
@@ -243,9 +247,13 @@ fullstack-todo-list/
 │           └── presentation/     # Controllers, modules
 │
 ├── packages/
+│   ├── eslint-config/            # Shared ESLint config (@repo/eslint-config)
 │   ├── database/                 # Prisma schema, client, migrations
 │   ├── shared/                   # Shared types and utilities
 │   └── config/                   # ESLint, TypeScript, Tailwind configs
+│
+├── docs/
+│   └── adr/                      # Architecture Decision Records
 │
 ├── docker/
 │   ├── docker-compose.yml

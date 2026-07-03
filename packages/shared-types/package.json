@@ -10,7 +10,14 @@
     }
   },
   "scripts": {
-    "build": "yarn run -T tsc -p tsconfig.json",
-    "typecheck": "yarn run -T tsc -p tsconfig.json --noEmit"
+    "build": "tsc -p tsconfig.json",
+    "lint": "eslint .",
+    "lint:fix": "eslint . --fix",
+    "typecheck": "tsc -p tsconfig.json --noEmit"
+  },
+  "devDependencies": {
+    "@repo/eslint-config": "workspace:*",
+    "eslint": "9.39.4",
+    "typescript": "5.9.3"
   }
 }
