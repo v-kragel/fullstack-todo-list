@@ -22,14 +22,14 @@ Each app **`extends`** the right preset and adds only local settings (`paths`, `
 
 ```json
 {
-  "extends": "../../packages/typescript-config/node.json",
+  "extends": "@repo/typescript-config/node.json",
   "compilerOptions": {
     "paths": { "@/*": ["src/*"] }
   }
 }
 ```
 
-**Relative path** is used instead of `@repo/typescript-config/node.json` — the IDE resolves `extends` from the app folder and does not see hoisted packages in root `node_modules`.
+**Package name** in `extends` works with Yarn workspaces — TypeScript resolves `@repo/typescript-config` from hoisted `node_modules`. Each app must list `@repo/typescript-config` in devDependencies.
 
 One shared tsconfig for the whole repo is not possible: client and server need different `module`, `moduleResolution`, `lib`, and JSX settings. Shared strict rules live in `base.json`; stack-specific options — in presets.
 
@@ -55,13 +55,13 @@ Because of this, each app that typechecks must declare `typescript` itself. On d
 
 ## Alternatives
 
-| Option                                           | Why not                                                                       |
-| ------------------------------------------------ | ----------------------------------------------------------------------------- |
-| `tsconfig.base.json` in root                     | Easy to add, easy to forget to extend — rules drift between apps              |
-| Single tsconfig for the whole monorepo           | Client and server need incompatible compiler settings                         |
-| `@repo/typescript-config/node.json` in `extends` | IDE shows "file not found" when the package is hoisted to root `node_modules` |
-| `typescript` only in root                        | Peer dependency warnings; `tsc` not found when running from an app            |
-| `packageExtensions` in Yarn                      | Dependencies are injected silently — hard to see what a package actually uses |
+| Option                                           | Why not                                                                                       |
+| ------------------------------------------------ | --------------------------------------------------------------------------------------------- |
+| `tsconfig.base.json` in root                     | Easy to add, easy to forget to extend — rules drift between apps                              |
+| Single tsconfig for the whole monorepo           | Client and server need incompatible compiler settings                                         |
+| `@repo/typescript-config/node.json` in `extends` | Works with hoisted workspace packages and IDE resolution when the app declares the dependency |
+| `typescript` only in root                        | Peer dependency warnings; `tsc` not found when running from an app                            |
+| `packageExtensions` in Yarn                      | Dependencies are injected silently — hard to see what a package actually uses                 |
 
 ## Pros
 
@@ -73,5 +73,4 @@ Because of this, each app that typechecks must declare `typescript` itself. On d
 ## Cons
 
 - `typescript` listed in multiple `package.json` files — versions must stay in sync manually (helped by `resolutions`)
-- New app requires wiring: devDependencies, preset choice, relative `extends`
-- Relative path ties tsconfig to repo folder layout
+- New app requires wiring: devDependencies, preset choice, `@repo/typescript-config/...` in `extends`

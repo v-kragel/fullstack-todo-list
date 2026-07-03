@@ -2,6 +2,7 @@ import nextVitals from "eslint-config-next/core-web-vitals";
 import nextTs from "eslint-config-next/typescript";
 import { defineConfig } from "eslint/config";
 
+import { clientAppBoundaryRules } from "./boundaries.mjs";
 import { createBaseConfig } from "./base.mjs";
 
 const defaultIgnores = [
@@ -29,6 +30,7 @@ export function createNextConfig(options) {
       tsconfigRootDir,
       ignores: [...defaultIgnores, ...ignores],
       includeEslintRecommended: false,
-    })
+    }),
+    { rules: clientAppBoundaryRules }
   );
 }
