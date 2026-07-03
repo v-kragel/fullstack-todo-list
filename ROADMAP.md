@@ -27,7 +27,7 @@ The goal of this project is to build a small, production-like fullstack service 
 
 ## Stage 1 — Monorepo
 
-**Status:** ⬜
+**Status:** ✅
 
 ### Goals
 
