@@ -199,19 +199,15 @@ yarn dev
 
 Commands are run from the monorepo root via Turborepo and Yarn workspaces.
 
-| Command            | Description                                    |
-| ------------------ | ---------------------------------------------- |
-| `yarn dev`         | Start frontend and backend in development mode |
-| `yarn build`       | Build all applications                         |
-| `yarn lint`        | Lint                                           |
-| `yarn lint:fix`    | Lint with auto-fix                             |
-| `yarn typecheck`   | TypeScript check across packages               |
-| `yarn test`        | Unit / integration tests (Jest)                |
-| `yarn test:e2e`    | E2E tests (Playwright)                         |
-| `yarn db:migrate`  | Apply Prisma migrations                        |
-| `yarn db:studio`   | Open Prisma Studio                             |
-| `yarn docker:up`   | Start Docker Compose                           |
-| `yarn docker:down` | Stop containers                                |
+| Command             | Description                                    |
+| ------------------- | ---------------------------------------------- |
+| `yarn dev`          | Start frontend and backend in development mode |
+| `yarn build`        | Build all applications                         |
+| `yarn lint`         | Lint all workspaces                            |
+| `yarn lint:fix`     | Lint with auto-fix                             |
+| `yarn typecheck`    | TypeScript check across workspaces             |
+| `yarn format`       | Format with Prettier                           |
+| `yarn format:check` | Check formatting                               |
 
 Run a single package:
 
@@ -247,10 +243,7 @@ fullstack-todo-list/
 │           └── presentation/     # Controllers, modules
 │
 ├── packages/
-│   ├── eslint-config/            # Shared ESLint config (@repo/eslint-config)
-│   ├── database/                 # Prisma schema, client, migrations
-│   ├── shared/                   # Shared types and utilities
-│   └── config/                   # ESLint, TypeScript, Tailwind configs
+│   └── eslint-config/            # Shared ESLint config (@repo/eslint-config)
 │
 ├── docs/
 │   └── adr/                      # Architecture Decision Records
@@ -263,7 +256,8 @@ fullstack-todo-list/
 │   └── workflows/                # GitHub Actions
 │
 ├── turbo.json
-├── package.json                  # Workspaces configuration
+├── package.json                  # Yarn workspaces + root scripts
+├── tsconfig.base.json            # Shared TypeScript compiler defaults
 └── README.md
 ```
 

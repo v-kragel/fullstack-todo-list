@@ -6,7 +6,7 @@ Accepted
 
 ## Context
 
-Yarn 4 workspaces + Turborepo monorepo: `apps/client` (Next.js), `apps/server` (NestJS), `packages/shared-types`, `packages/eslint-config`.
+Yarn 4 workspaces + Turborepo monorepo: `apps/client` (Next.js), `apps/server` (NestJS), `packages/eslint-config`.
 
 We need a production-grade setup: shared ESLint rules, type-aware linting, a single `eslint`/`typescript` version across the repo, and per-package lint via Turbo.
 
@@ -32,7 +32,7 @@ We need a production-grade setup: shared ESLint rules, type-aware linting, a sin
 
 ### TypeScript
 
-1. **`typescript`** is explicitly listed in devDependencies of every package that runs `typecheck` or `build` (`client`, `server`, `shared-types`).
+1. **`typescript`** is explicitly listed in devDependencies of every package that runs `typecheck` or `build` (`client`, `server`).
 
 2. **Root** holds `typescript` plus `resolutions` to pin one version across the entire dependency tree.
 

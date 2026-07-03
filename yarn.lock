@@ -1886,16 +1886,6 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@repo/shared-types@workspace:packages/shared-types":
-  version: 0.0.0-use.local
-  resolution: "@repo/shared-types@workspace:packages/shared-types"
-  dependencies:
-    "@repo/eslint-config": "workspace:*"
-    eslint: "npm:9.39.4"
-    typescript: "npm:5.9.3"
-  languageName: unknown
-  linkType: soft
-
 "@rtsao/scc@npm:^1.1.0":
   version: 1.1.0
   resolution: "@rtsao/scc@npm:1.1.0"
