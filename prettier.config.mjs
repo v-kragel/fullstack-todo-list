@@ -7,7 +7,7 @@ export default {
   trailingComma: "es5",
   printWidth: 80,
   arrowParens: "always",
-  endOfLine: "crlf",
+  endOfLine: "lf",
   bracketSpacing: true,
   singleAttributePerLine: false,
   quoteProps: "as-needed",
