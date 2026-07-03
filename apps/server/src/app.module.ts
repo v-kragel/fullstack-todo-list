@@ -1,6 +1,6 @@
-import { Module } from '@nestjs/common';
+import { Module } from "@nestjs/common";
 
-import { PresentationAppModule } from '@/presentation/app';
+import { PresentationAppModule } from "@/presentation/app";
 
 @Module({
   imports: [PresentationAppModule],
